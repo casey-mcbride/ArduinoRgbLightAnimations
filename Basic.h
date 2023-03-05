@@ -27,6 +27,17 @@ inline void initDebugIO()
 	#define debug(message)\
 		Serial.println((message));
 
+	#define debugValue(header, value)\
+		Serial.print(header);\
+		Serial.print(": ");\
+		Serial.println(value);
+
+	#define debugValueIf(flag, header, value)\
+		if(flag)\
+		{\
+			debugValue(header, value);\
+		}\
+
 	#define debugBlink(on)\
 		Serial.print("Blink: ");\
 		Serial.println(on ? "On" : "Off");\
@@ -40,14 +51,12 @@ inline void initDebugIO()
 
 
 #else
-	#define assert(flag, message)\
-		// Do nothing
+	#define assert(flag, message)
+	#define debug(message)
+	#define debugValue(header, value)
+	#define debugValueIf(flag, header, value)
+	#define debugBlink(on)
 
-	#define debug(message)\
-		// Do nothing
-
-	#define debugBlink(on)\
-		// Do nothing
 #endif
 
 template<typename numeric>
@@ -87,6 +96,16 @@ int getNextRandomExclusive(int start, int exclusiveMax)
 	start = (start + 1) % exclusiveMax;
 
 	return start;
+}
+
+int random(int inclusiveMin, int exclusiveMax)
+{
+	return random(exclusiveMax - inclusiveMin) + inclusiveMin;
+}
+
+bool randomBool()
+{
+	return random(2);
 }
 
 // template<typename TypeOne, typename TypeTwo>

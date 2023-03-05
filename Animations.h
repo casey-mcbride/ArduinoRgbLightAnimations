@@ -382,3 +382,74 @@ void linnaeusFavoriteBrightSpotsAnimation()
 {
 	randomBrightSpots(Color::Green, Color::Blue);
 }
+
+void rainbowLineSwap()
+{
+	const int WINDOW_SIZE = 50;
+	const int RAINBOW_LINE_SWAP_DELAY = 70;
+	Color current = Color::Black;
+	for(int ledIndex = 0; ledIndex < NUM_LEDS; ledIndex++)
+	{
+		setLed(ledIndex, current);
+	}
+	FastLED.show();
+	bool goingRight = true;
+
+	const int SPOT_RANGE = NUM_LEDS + WINDOW_SIZE;
+
+	WHILE_ANIMATION_LOOP
+	{
+		Color next = getNextRandomColor();
+		if(goingRight)
+		{
+			for(int spotPosition = 0; spotPosition < SPOT_RANGE; spotPosition++)
+			{
+				for(int ledIndex = 0; ledIndex < NUM_LEDS; ledIndex++)
+				{
+					float lerpValue;
+					if(ledIndex > spotPosition)
+						lerpValue = 1.0f;
+					else if(ledIndex < spotPosition - WINDOW_SIZE)
+						lerpValue = 0.0f;
+					else
+						lerpValue =  1.0f - (float)(spotPosition - ledIndex) / WINDOW_SIZE;
+
+					Color color = colorLerp(lerpValue, next, current);
+					setLed(ledIndex, color);
+				}
+
+				FastLED.show();
+				delay(RAINBOW_LINE_SWAP_DELAY);
+			}
+		}
+		else
+		{
+			for(int spotPosition = SPOT_RANGE; spotPosition >= 0; spotPosition--)
+			{
+				for(int ledIndex = 0; ledIndex < NUM_LEDS; ledIndex++)
+				{
+					float lerpValue;
+					if(ledIndex < spotPosition - WINDOW_SIZE)
+						lerpValue = 1.0f;
+					else if(ledIndex > spotPosition)
+						lerpValue = 0.0f;
+					else
+						lerpValue =  (float)(spotPosition - ledIndex) / WINDOW_SIZE;
+
+					Color color = colorLerp(lerpValue, next, current);
+					setLed(ledIndex, color);
+				}
+
+				FastLED.show();
+				delay(RAINBOW_LINE_SWAP_DELAY);
+			}
+		}
+
+		goingRight = !goingRight;
+		current = next;
+		next = getNextRandomColor();
+
+		// Hold color for a b
+		delay(500);
+	}
+}

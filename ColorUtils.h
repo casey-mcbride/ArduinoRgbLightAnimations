@@ -1,11 +1,7 @@
 #pragma once
 #include "Basic.h"
 
-#ifdef DEBUG
-	#define NUM_LEDS 50
-#else
-	#define NUM_LEDS 100
-#endif
+#define NUM_LEDS 100
 
 typedef CRGB Color;
 

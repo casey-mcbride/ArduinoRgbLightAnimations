@@ -19,6 +19,7 @@ AnimationFunction* ANIMATIONS[] =
 	&greenBlueThrobAnimation,
 	&linnaeusFavoriteBrightSpotsAnimation,
 	&randomMixedWaveAnimation,
+	&rainbowLineSwap,
 };
 int NUM_ANMIATIONS = sizeof(ANIMATIONS)/ sizeof(ANIMATIONS[0]);
 
