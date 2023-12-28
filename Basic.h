@@ -5,17 +5,6 @@
 const byte BYTE_MAX = 255;
 const byte BYTE_MIN = 0;
 
-inline void initDebugIO()
-{
-	#ifdef DEBUG
-	// Start io
-	Serial.begin(9600);
-
-	pinMode(LED_BUILTIN, OUTPUT);
-	#endif
-}
-
-
 #ifdef DEBUG
 	#define assert(flag, message)\
 		if(!(flag)) \
@@ -58,6 +47,18 @@ inline void initDebugIO()
 	#define debugBlink(on)
 
 #endif
+
+inline void initDebugIO()
+{
+	#ifdef DEBUG
+	// Start io
+	Serial.begin(9600);
+
+	pinMode(LED_BUILTIN, OUTPUT);
+	debug("IO initialized");
+	#endif
+}
+
 
 template<typename numeric>
 numeric clamp(numeric value,numeric minValue, numeric maxValue)

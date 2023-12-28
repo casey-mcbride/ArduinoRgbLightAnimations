@@ -20,6 +20,7 @@ const Color SIMPLE_RAINBOW[] =
 const int SIMPLE_RAINBOW_COLOR_COUNT = sizeof(SIMPLE_RAINBOW) / sizeof(SIMPLE_RAINBOW[0]);
 
 
+const Color DIM_WHITE = Color(80, 80, 80);
 const Color WHITE = Color(120, 120, 120);
 const Color ORCHID = Color(255, 0, 100);
 const Color HOT_PINK = Color::HotPink;
