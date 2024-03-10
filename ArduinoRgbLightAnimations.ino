@@ -1,48 +1,12 @@
 #include "FastLED.h"
 #include "ColorUtils.h"
 #include "Animations.h"
+#include "LedClusterAnimations.h"
 #include "Basic.h"
 
 #define LED_DATA_PIN 6
 #define MAX_BRIGHTNESS 100
 // typedef void* (int) AnimationFunction;
-using AnimationFunction = void(void);
-AnimationFunction* ANIMATIONS[] =
-{
-	&rainbowColorHillAnimation,
-	// &rainbowBeamOverwriteAnimation,
-	// &greenRedAlternateAnimation,
-	&rainbowColorBeamCollisionAnimation,
-	&greenBlueWavesAnimation,
-	&rainbowColorBeamAnimation,
-	&greenBlueThrobAnimation,
-	&linnaeusFavoriteBrightSpotsAnimation,
-	&randomMixedWaveAnimation,
-	&rainbowLineSwap,
-};
-int NUM_ANMIATIONS = sizeof(ANIMATIONS)/ sizeof(ANIMATIONS[0]);
-
-AnimationFunction* CHIMNEY_ANIMATIONS[] =
-{
-	// &waterFill,
-	&rainbowColorThrob,
-	&candyCaneMixedWave,
-	&fireGlow,
-	&christmasBrightSpots,
-	&rainbowColorHillAnimation,
-	// &rainbowBeamOverwriteAnimation,
-	// &greenRedAlternateAnimation,
-	&rainbowColorBeamCollisionAnimation,
-	&rainbowLineSwap,
-	&candyCaneSpiral,
-	&greenBlueWavesAnimation,
-	&rainbowColorBeamAnimation,
-	&greenBlueThrobAnimation,
-	&linnaeusFavoriteBrightSpotsAnimation,
-	&randomMixedWaveAnimation,
-	&rainbowLineSwap,
-};
-int NUM_CHIMNEY_ANMIATIONS = sizeof(CHIMNEY_ANIMATIONS)/ sizeof(CHIMNEY_ANIMATIONS[0]);
 
 void setup()
 {
@@ -61,12 +25,21 @@ void setup()
 	FastLED.show();
 }
 
+LedClusterAnimator LED_CLUSTER_ANIMATORS[] =
+{
+	LedClusterAnimator(46, 49),
+	LedClusterAnimator(42, 45),
+	LedClusterAnimator(38, 41),
+	LedClusterAnimator(34, 37),
+	LedClusterAnimator(30, 33),
+};
+const int NUM_LED_CLUSTER_ANIMATORS = sizeof(LED_CLUSTER_ANIMATORS)/ sizeof(LED_CLUSTER_ANIMATORS[0]);
+
 void loop()
 {
-	for(int animationIndex = 0; animationIndex < NUM_CHIMNEY_ANMIATIONS; animationIndex++)
-	{
-		Serial.print("Starting animation: ");
-		Serial.println(animationIndex);
-		CHIMNEY_ANIMATIONS[animationIndex]();
-	}
+	//for(int animationIndex = 0; animationIndex < NUM_CHIMNEY_ANMIATIONS; animationIndex++)
+	//{
+	//	CHIMNEY_ANIMATIONS[animationIndex]();
+	//}
+	doLedClusterAnimations(LED_CLUSTER_ANIMATORS, NUM_LED_CLUSTER_ANIMATORS);
 }

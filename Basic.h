@@ -19,7 +19,7 @@ const byte BYTE_MIN = 0;
 	#define debugValue(header, value)\
 		Serial.print(header);\
 		Serial.print(": ");\
-		Serial.println(value);
+		Serial.println((value));
 
 	#define debugValueIf(flag, header, value)\
 		if(flag)\
@@ -108,6 +108,8 @@ bool randomBool()
 {
 	return random(2);
 }
+
+typedef unsigned long Timestamp;
 
 // template<typename TypeOne, typename TypeTwo>
 // struct Pair

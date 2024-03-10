@@ -1,4 +1,6 @@
 #pragma once
+// Contains a set of animations for animating a string of led lights
+
 #include "ColorUtils.h"
 #include "Basic.h"
 
@@ -570,3 +572,51 @@ void christmasBrightSpots()
 }
 
 //endregion Chimeny animations
+
+using AnimationFunction = void(void);
+AnimationFunction* ANIMATIONS[] =
+{
+	&rainbowColorHillAnimation,
+	// &rainbowBeamOverwriteAnimation,
+	// &greenRedAlternateAnimation,
+	&rainbowColorBeamCollisionAnimation,
+	&greenBlueWavesAnimation,
+	&rainbowColorBeamAnimation,
+	&greenBlueThrobAnimation,
+	&linnaeusFavoriteBrightSpotsAnimation,
+	&randomMixedWaveAnimation,
+	&rainbowLineSwap,
+};
+int NUM_ANMIATIONS = sizeof(ANIMATIONS)/ sizeof(ANIMATIONS[0]);
+
+AnimationFunction* CHIMNEY_ANIMATIONS[] =
+{
+	// &waterFill,
+	&rainbowColorThrob,
+	&candyCaneMixedWave,
+	&fireGlow,
+	&christmasBrightSpots,
+	&rainbowColorHillAnimation,
+	// &rainbowBeamOverwriteAnimation,
+	// &greenRedAlternateAnimation,
+	&rainbowColorBeamCollisionAnimation,
+	&rainbowLineSwap,
+	&candyCaneSpiral,
+	&greenBlueWavesAnimation,
+	&rainbowColorBeamAnimation,
+	&greenBlueThrobAnimation,
+	&linnaeusFavoriteBrightSpotsAnimation,
+	&randomMixedWaveAnimation,
+	&rainbowLineSwap,
+};
+int NUM_CHIMNEY_ANMIATIONS = sizeof(CHIMNEY_ANIMATIONS)/ sizeof(CHIMNEY_ANIMATIONS[0]);
+
+void doSingleStrandAnimationLoop()
+{
+	for(int animationIndex = 0; animationIndex < NUM_CHIMNEY_ANMIATIONS; animationIndex++)
+	{
+		debug("Starting animation: ");
+		debug(animationIndex);
+		CHIMNEY_ANIMATIONS[animationIndex]();
+	}
+}

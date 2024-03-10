@@ -1,7 +1,7 @@
 #pragma once
 #include "Basic.h"
 
-#define NUM_LEDS 100
+#define NUM_LEDS 50
 
 typedef CRGB Color;
 
@@ -158,7 +158,7 @@ inline void setLed( int index, Color color)
 	leds[index] = color;
 }
 
-inline Color getLed( int index)
+inline Color getLed(int index)
 {
 	assert(index >= 0 && index < NUM_LEDS, "LED index out of bounds");
 	index = clamp(index, 0, NUM_LEDS - 1);
@@ -202,12 +202,28 @@ Color colorAverage(Color color1, Color color2, Color color3, float weight1, floa
 	return Color(clampToByte((int)r), clampToByte((int)g), clampToByte((int)b));
 }
 
-int randomColorIndex = 0;
+class NextColorGenerator
+{
+	int randomColorIndex = 0;
+
+public:
+	NextColorGenerator()
+	{
+		randomColorIndex = random(COMPLEX_RAINBOW_COLOR_COUNT);
+	}
+
+	Color getNextRandomColor()
+	{
+		randomColorIndex = getNextRandomExclusive(randomColorIndex, COMPLEX_RAINBOW_COLOR_COUNT);
+
+		return COMPLEX_RAINBOW[randomColorIndex];
+	}
+};
+
+static NextColorGenerator colorGenerator;
 Color getNextRandomColor()
 {
-	randomColorIndex = getNextRandomExclusive(randomColorIndex, COMPLEX_RAINBOW_COLOR_COUNT);
-
-	return COMPLEX_RAINBOW[randomColorIndex];
+	colorGenerator.getNextRandomColor();
 }
 
 int randomColorPairIndex = 0;
