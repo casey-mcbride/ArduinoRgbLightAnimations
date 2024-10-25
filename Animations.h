@@ -3,6 +3,8 @@
 
 #include "ColorUtils.h"
 #include "Basic.h"
+#include "ColorPalette.h"
+#include "ColorPairPalette.h"
 
 typedef unsigned long ulong;
 #ifdef DEBUG
@@ -24,46 +26,8 @@ bool shouldContinueAnimation(ulong start)
 
 const int BEAM_ANIMATION_DELAY = 20;
 
-void greenRedAlternateAnimation()
-{
-	byte brightness;
-	bool brightnessIncreasing;
-	int animationOffset = 0;
-	WHILE_ANIMATION_LOOP
-	{
-		for(int brightness = 0; brightness < BYTE_MAX; brightness++)
-		{
-			for(int ledIndex = 0; ledIndex < NUM_LEDS; ledIndex++)
-			{
-				if((ledIndex + animationOffset) % 2 == 0)
-					setLed(ledIndex, Color(brightness, 0, 0));
-				else
-					setLed(ledIndex, Color(0, brightness, 0));
-			}
-
-			FastLED.show();
-			delay(5);
-		}
-
-		for(int brightness = BYTE_MAX; brightness > BYTE_MIN; brightness--)
-		{
-			for(int ledIndex = 0; ledIndex < NUM_LEDS; ledIndex++)
-			{
-				if((ledIndex + animationOffset) % 2 == 0)
-					setLed(ledIndex, Color(brightness, 0, 0));
-				else
-					setLed(ledIndex, Color(0, brightness, 0));
-			}
-
-			FastLED.show();
-			delay(5);
-		}
-
-		animationOffset++;
-	}
-}
-
-void greenBlueMarchAnimation()
+// Marches throught the given colors, with bandSize number of colors repeated in a row
+void colorMarch(Color* colors, int numColors, const int bandSize)
 {
 	int cycleOffset = 0;
 
@@ -71,10 +35,8 @@ void greenBlueMarchAnimation()
 	{
 		for(int i = 0; i < NUM_LEDS; i++)
 		{
-			if((i + cycleOffset) % 5 == 0)
-				setLed(i, Color::Blue);
-			else
-				setLed(i, Color::Green);
+			Color c = colors[((i + cycleOffset) / bandSize) % numColors];
+			setLed(i, c);
 		}
 
 		FastLED.show();
@@ -83,42 +45,8 @@ void greenBlueMarchAnimation()
 	}
 }
 
-void greenBlueFadeMarchAnimation()
-{
-	int cycleOffset = 0;
-	const int TRAIL_LENGTH = 4;
-	const int FADE_ANIMATION_TICKS = 30;
 
-	WHILE_ANIMATION_LOOP
-	{
-		for(int lerpCycle = 0; lerpCycle < FADE_ANIMATION_TICKS; lerpCycle++)
-		{
-			for(int i = 0; i < NUM_LEDS; i++)
-			{
-				int cyclePosition = (i + cycleOffset) % TRAIL_LENGTH;
-				if( cyclePosition < TRAIL_LENGTH - 2)
-				{
-					setLed(i, Color::Green);
-				}
-				else
-				{
-					float lerpValue = (float)lerpCycle / FADE_ANIMATION_TICKS;
-					// Flip it around, so one is getting bluer, and the last one is getting grener
-					if(cyclePosition == TRAIL_LENGTH - 1)
-						lerpValue = 1.0f - lerpValue;
-
-					Color interpolatedColor = colorLerp(lerpValue, Color::Green, Color::Blue);
-					setLed(i, interpolatedColor);
-				}
-			}
-			FastLED.show();
-			delay(30);
-		}
-
-		cycleOffset++;
-	}
-}
-
+// Animation that has two colors moving together in one direction, with one color then the next with them lerped together
 void mixedWaveAnimation(Color color1, Color color2)
 {
 	int cycleOffset = 0;
@@ -140,11 +68,6 @@ void mixedWaveAnimation(Color color1, Color color2)
 		delay(60);
 		cyclePosition = (cyclePosition + 1) % WAVE_LENGTH;
 	}
-}
-
-void greenBlueWavesAnimation()
-{
-	mixedWaveAnimation(LIME_GREEN, ROYAL_BLUE);
 }
 
 void randomMixedWaveAnimation()
@@ -206,12 +129,12 @@ void greenBlueThrobAnimation()
 	}
 }
 
-void rainbowColorThrob()
+void colorThrob(ColorPalette& colorGenerator)
 {
 	int cycleOffset = 0;
 	const int TRANSITION_TICKS = 100;
-	Color color1 = getNextRandomColor();
-	Color color2 = getNextRandomColor();
+	Color color1 = colorGenerator.getNextRandomColor();
+	Color color2 = colorGenerator.getNextRandomColor();
 
 	WHILE_ANIMATION_LOOP
 	{
@@ -229,11 +152,11 @@ void rainbowColorThrob()
 			delay(60);
 		}
 		color2 = color1;
-		color1 = getNextRandomColor();
+		color1 = colorGenerator.getNextRandomColor();
 	}
 }
 
-void rainbowColorHillAnimation()
+void rainbowColorHillAnimation(ColorPalette& colorGenerator)
 {
 	const byte trailLength = NUM_LEDS;
 	const int BUFFER = 10;
@@ -241,7 +164,7 @@ void rainbowColorHillAnimation()
 
 	WHILE_ANIMATION_LOOP
 	{
-		Color color = getNextRandomColor();
+		Color color = colorGenerator.getNextRandomColor();
 		for(int spotPosition = 0 - trailLength; spotPosition < trailDistance; spotPosition++)
 		{
 			for(int ledIndex = 0; ledIndex < NUM_LEDS; ledIndex++)
@@ -257,7 +180,7 @@ void rainbowColorHillAnimation()
 		}
 
 		// Go reverse direction
-		color = getNextRandomColor();
+		color = colorGenerator.getNextRandomColor();
 		for(int spotPosition = 0 - trailLength; spotPosition < trailDistance; spotPosition++)
 		{
 			for(int ledIndex = 0; ledIndex < NUM_LEDS; ledIndex++)
@@ -367,7 +290,7 @@ void rainbowColorBeamCollisionAnimation()
 	}
 }
 
-void randomBrightSpots(Color* colors, int numColors, int fadeTicks)
+void randomBrightSpots(ColorPalette& generator, int fadeTicks)
 {
 	const int COLOR_CHANCE = 25;
 	WHILE_ANIMATION_LOOP
@@ -380,7 +303,7 @@ void randomBrightSpots(Color* colors, int numColors, int fadeTicks)
 			{
 				if(random(COLOR_CHANCE) == 0)
 				{
-					current = colors[random(numColors)];
+					current = generator.getAnyRandomColor();
 				}
 			}
 			setLed(ledIndex, current);
@@ -390,24 +313,11 @@ void randomBrightSpots(Color* colors, int numColors, int fadeTicks)
 	}
 }
 
-// // Meant to resemble the glow of a fire
-void fireGlow()
-{
-	Color emberColors[] = {Color(50, 0, 0), Color(40, 0, 0), Color(30, 0, 0), Color(20, 0, 0), Color(10, 0, 0), Color(20, 20, 0), Color(20, 10, 0), Color(30, 10, 0)};
-	randomBrightSpots(emberColors, sizeof(emberColors)/sizeof(emberColors[0]), 1);
-}
-
-void linnaeusFavoriteBrightSpotsAnimation()
-{
-	Color linnaeusColors[] = {Color::Green, Color::Blue};
-	randomBrightSpots(linnaeusColors, sizeof(linnaeusColors)/sizeof(linnaeusColors[0]), 10);
-}
-
 // One color goes up, making it solid then another color merges down merging and erasing the covered one, rinse repeat
-void rainbowLineSwap()
+void lineSwap(ColorPalette& colorGenerator)
 {
 	const int WINDOW_SIZE = 50;
-	const int RAINBOW_LINE_SWAP_DELAY = 70;
+	const int LINE_SWAP_DELAY = 70;
 	Color current = Color::Black;
 	for(int ledIndex = 0; ledIndex < NUM_LEDS; ledIndex++)
 	{
@@ -420,7 +330,7 @@ void rainbowLineSwap()
 
 	WHILE_ANIMATION_LOOP
 	{
-		Color next = getNextRandomColor();
+		Color next = colorGenerator.getNextRandomColor();
 		if(goingRight)
 		{
 			for(int spotPosition = 0; spotPosition < SPOT_RANGE; spotPosition++)
@@ -440,7 +350,7 @@ void rainbowLineSwap()
 				}
 
 				FastLED.show();
-				delay(RAINBOW_LINE_SWAP_DELAY);
+				delay(LINE_SWAP_DELAY);
 			}
 		}
 		else
@@ -462,17 +372,79 @@ void rainbowLineSwap()
 				}
 
 				FastLED.show();
-				delay(RAINBOW_LINE_SWAP_DELAY);
+				delay(LINE_SWAP_DELAY);
 			}
 		}
 
 		goingRight = !goingRight;
 		current = next;
-		next = getNextRandomColor();
 
-		// Hold color for a b
+		// Hold color for a bit
 		delay(500);
 	}
+}
+
+void rainbowColorThrob()
+{
+	colorThrob(COMPLEX_RAINBOW_COLOR_GENERATOR);
+}
+
+// Meant to resemble the glow of a fire
+void fireGlow()
+{
+	Color emberColors[] = {Color(50, 0, 0), Color(40, 0, 0), Color(30, 0, 0), Color(20, 0, 0), Color(10, 0, 0), Color(20, 20, 0), Color(20, 10, 0), Color(30, 10, 0)};
+	ColorPalette palette(emberColors, getStaticArraySize(emberColors));
+	randomBrightSpots(palette, 1);
+}
+
+void linnaeusFavoriteBrightSpotsAnimation()
+{
+	Color linnaeusColors[] = {Color::Green, Color::Blue};
+	ColorPalette palette(linnaeusColors, getStaticArraySize(linnaeusColors));
+	randomBrightSpots(palette, 10);
+}
+
+void greenBlueMarchAnimation()
+{
+	Color colors[] = {Color::Green, Color::Blue};
+	colorMarch(colors, getStaticArraySize(colors), 2);
+}
+
+void greenBlueWavesAnimation()
+{
+	mixedWaveAnimation(LIME_GREEN, ROYAL_BLUE);
+}
+
+void rainbowLineSwap()
+{
+	lineSwap(COMPLEX_RAINBOW_COLOR_GENERATOR);
+}
+
+void candyCornMarch()
+{
+	Color colors[] = {Color::White, Color::OrangeRed, GOLDEN_YELLOW};
+	int numColors = sizeof(colors)/sizeof(colors[0]);
+
+	colorMarch(colors, numColors, 2);
+}
+
+void halloweenBlinkAnimation()
+{
+	Color colors[] = {Color::Purple, Color::Orange, Color::Green};
+	ColorPalette palette(colors, getStaticArraySize(colors));
+	randomBrightSpots(palette, 10);
+}
+
+void halloweenLineSwap()
+{
+	lineSwap(HALLOWEEN_COLOR_GENERATOR);
+}
+
+void halloweenMixedWave()
+{
+	Color one, two;
+	HALLOWEEN_COLOR_PAIR_GENERATOR.getNextRandomColorPair(one, two);
+	mixedWaveAnimation(one, two);
 }
 
 //region Chimney animations
@@ -564,11 +536,11 @@ void candyCaneMixedWave()
 	mixedWaveAnimation(Color::Red, DIM_WHITE);
 }
 
-// Meant to resemble the glow of a fire
 void christmasBrightSpots()
 {
 	Color christmasColors[] = {Color::Green, Color::Red, DIM_WHITE};
-	randomBrightSpots(christmasColors, sizeof(christmasColors)/sizeof(christmasColors[0]), 10);
+	ColorPalette palette(christmasColors, getStaticArraySize(christmasColors));
+	randomBrightSpots(palette, 10);
 }
 
 //endregion Chimeny animations
@@ -577,8 +549,6 @@ using AnimationFunction = void(void);
 AnimationFunction* ANIMATIONS[] =
 {
 	&rainbowColorHillAnimation,
-	// &rainbowBeamOverwriteAnimation,
-	// &greenRedAlternateAnimation,
 	&rainbowColorBeamCollisionAnimation,
 	&greenBlueWavesAnimation,
 	&rainbowColorBeamAnimation,
@@ -587,7 +557,17 @@ AnimationFunction* ANIMATIONS[] =
 	&randomMixedWaveAnimation,
 	&rainbowLineSwap,
 };
-int NUM_ANMIATIONS = sizeof(ANIMATIONS)/ sizeof(ANIMATIONS[0]);
+int NUM_ANIMATIONS = sizeof(ANIMATIONS)/ sizeof(ANIMATIONS[0]);
+
+AnimationFunction* HALLOWEEN_ANIMATIONS[] =
+{
+	&halloweenMixedWave,
+	&halloweenLineSwap,
+	&halloweenBlinkAnimation,
+	&halloweenMixedWave,
+	&candyCornMarch,
+};
+int NUM_HALLOWEEN_ANIMATIONS = sizeof(HALLOWEEN_ANIMATIONS)/ sizeof(HALLOWEEN_ANIMATIONS[0]);
 
 AnimationFunction* CHIMNEY_ANIMATIONS[] =
 {
@@ -597,8 +577,6 @@ AnimationFunction* CHIMNEY_ANIMATIONS[] =
 	&fireGlow,
 	&christmasBrightSpots,
 	&rainbowColorHillAnimation,
-	// &rainbowBeamOverwriteAnimation,
-	// &greenRedAlternateAnimation,
 	&rainbowColorBeamCollisionAnimation,
 	&rainbowLineSwap,
 	&candyCaneSpiral,

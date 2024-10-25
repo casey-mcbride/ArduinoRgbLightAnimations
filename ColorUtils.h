@@ -1,9 +1,9 @@
 #pragma once
 #include "Basic.h"
+#include "ColorPalette.h"
+#include "ColorPairPalette.h"
 
-#define NUM_LEDS 50
-
-typedef CRGB Color;
+#define NUM_LEDS 100
 
 Color leds[NUM_LEDS];
 
@@ -151,15 +151,47 @@ const Color RAINBOW_PAIRS[] =
 };
 const int NUM_RAINBOW_PAIRS = sizeof(RAINBOW_PAIRS) / sizeof(RAINBOW_PAIRS[0]) / 2;
 
-inline void setLed( int index, Color color)
+Color HALLOWEEN_COLORS[] = {Color::Purple, Color::Orange, Color::Green, Color::Red};
+const int NUM_HALLOWEEN_COLORS = sizeof(HALLOWEEN_COLORS) / sizeof(HALLOWEEN_COLORS[0]);
+
+Color HALLOWEEN_PAIRS[] = 
 {
+	Color::Purple,
+	Color::Red,
+
+	Color::Purple,
+	Color::Green,
+
+	Color::Red,
+	Color::Orange,
+
+	Color::Green,
+	Color::Orange,
+};
+const int NUM_HALLOWEEN_COLOR_PAIRS = sizeof(HALLOWEEN_PAIRS) / sizeof(HALLOWEEN_PAIRS[0]);
+
+bool isLedDirectionSwapped = false;
+
+inline void toggleLedDirection()
+{
+	isLedDirectionSwapped = !isLedDirectionSwapped;
+}
+
+void setLed( int index, Color color)
+{
+	if(isLedDirectionSwapped)
+		index = NUM_LEDS - (index + 1);
+
 	assert(index >= 0 && index < NUM_LEDS, "LED index out of bounds");
 	index = clamp(index, 0, NUM_LEDS - 1);
 	leds[index] = color;
 }
 
-inline Color getLed(int index)
+Color getLed(int index)
 {
+	if(isLedDirectionSwapped)
+		index = NUM_LEDS - (index + 1);
+
 	assert(index >= 0 && index < NUM_LEDS, "LED index out of bounds");
 	index = clamp(index, 0, NUM_LEDS - 1);
 	return leds[index];
@@ -202,45 +234,18 @@ Color colorAverage(Color color1, Color color2, Color color3, float weight1, floa
 	return Color(clampToByte((int)r), clampToByte((int)g), clampToByte((int)b));
 }
 
-class NextColorGenerator
-{
-	int randomColorIndex = 0;
 
-public:
-	NextColorGenerator()
-	{
-		randomColorIndex = random(COMPLEX_RAINBOW_COLOR_COUNT);
-	}
+static ColorPalette COMPLEX_RAINBOW_COLOR_GENERATOR(COMPLEX_RAINBOW, COMPLEX_RAINBOW_COLOR_COUNT);
+static ColorPairPalette COMPLEX_RAINBOW_COLOR_PAIR_GENERATOR(RAINBOW_PAIRS, NUM_RAINBOW_PAIRS);
+static ColorPalette HALLOWEEN_COLOR_GENERATOR(HALLOWEEN_COLORS, NUM_HALLOWEEN_COLORS);
+static ColorPairPalette HALLOWEEN_COLOR_PAIR_GENERATOR(HALLOWEEN_PAIRS, NUM_HALLOWEEN_COLOR_PAIRS);
 
-	Color getNextRandomColor()
-	{
-		randomColorIndex = getNextRandomExclusive(randomColorIndex, COMPLEX_RAINBOW_COLOR_COUNT);
-
-		return COMPLEX_RAINBOW[randomColorIndex];
-	}
-};
-
-static NextColorGenerator colorGenerator;
 Color getNextRandomColor()
 {
-	colorGenerator.getNextRandomColor();
+	COMPLEX_RAINBOW_COLOR_GENERATOR.getNextRandomColor();
 }
 
-int randomColorPairIndex = 0;
 void getNextRandomColorPair(Color& color1, Color& color2)
 {
-	randomColorPairIndex = getNextRandomExclusive(randomColorPairIndex, NUM_RAINBOW_PAIRS);
-
-	// Also randomize which one is 1, and which is 2
-	int offsetIndex = randomColorPairIndex * 2;
-	if(random(2) == 0)
-	{
-		color1 = RAINBOW_PAIRS[offsetIndex];
-		color2 = RAINBOW_PAIRS[offsetIndex + 1];
-	}
-	else
-	{
-		color1 = RAINBOW_PAIRS[offsetIndex + 1];
-		color2 = RAINBOW_PAIRS[offsetIndex];
-	}
+	COMPLEX_RAINBOW_COLOR_PAIR_GENERATOR.getNextRandomColorPair(color1, color2);
 }

@@ -28,18 +28,23 @@ void setup()
 LedClusterAnimator LED_CLUSTER_ANIMATORS[] =
 {
 	LedClusterAnimator(46, 49),
-	LedClusterAnimator(42, 45),
+	// LedClusterAnimator(42, 45),
 	LedClusterAnimator(38, 41),
-	LedClusterAnimator(34, 37),
-	LedClusterAnimator(30, 33),
+	// LedClusterAnimator(34, 37),
+	// LedClusterAnimator(30, 33),
+	// LedClusterAnimator(30, 33),
 };
 const int NUM_LED_CLUSTER_ANIMATORS = sizeof(LED_CLUSTER_ANIMATORS)/ sizeof(LED_CLUSTER_ANIMATORS[0]);
 
 void loop()
 {
-	//for(int animationIndex = 0; animationIndex < NUM_CHIMNEY_ANMIATIONS; animationIndex++)
-	//{
-	//	CHIMNEY_ANIMATIONS[animationIndex]();
-	//}
-	doLedClusterAnimations(LED_CLUSTER_ANIMATORS, NUM_LED_CLUSTER_ANIMATORS);
+	for(int animationIndex = 0; animationIndex < NUM_HALLOWEEN_ANIMATIONS; animationIndex++)
+	{
+		HALLOWEEN_ANIMATIONS[animationIndex]();
+
+		toggleLedDirection();
+	}
+
+	if(NUM_HALLOWEEN_ANIMATIONS % 2 == 0)
+		toggleLedDirection();
 }

@@ -48,6 +48,8 @@ const byte BYTE_MIN = 0;
 
 #endif
 
+#define getStaticArraySize(array) sizeof(array) / sizeof(array[0])
+
 inline void initDebugIO()
 {
 	#ifdef DEBUG
@@ -110,6 +112,7 @@ bool randomBool()
 }
 
 typedef unsigned long Timestamp;
+typedef CRGB Color;
 
 // template<typename TypeOne, typename TypeTwo>
 // struct Pair

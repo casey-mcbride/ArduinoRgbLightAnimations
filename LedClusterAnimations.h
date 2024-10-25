@@ -1,6 +1,8 @@
 #pragma once
 #include "ColorUtils.h"
 #include "Basic.h"
+#include "ColorPalette.h"
+#include "ColorPairPalette.h"
 // Contains sets of animations for animating a subset of a string of led lights.
 
 enum AnimationKey
@@ -28,7 +30,7 @@ public:
 	Timestamp animationStartTime;
 	Timestamp animationEndTime;
 	AnimationState animationState;
-	NextColorGenerator colorGenerator;
+	ColorPalette colorGenerator = COMPLEX_RAINBOW_COLOR_GENERATOR;
 	Color* startWarmupColors;
 	Color* endWarmupColors;
 
