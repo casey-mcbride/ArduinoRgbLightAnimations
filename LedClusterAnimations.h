@@ -30,7 +30,7 @@ public:
 	Timestamp animationStartTime;
 	Timestamp animationEndTime;
 	AnimationState animationState;
-	ColorPalette colorGenerator = COMPLEX_RAINBOW_COLOR_GENERATOR;
+	ColorPalette colorGenerator = COMPLEX_RAINBOW_COLOR_PALETTE;
 	Color* startWarmupColors;
 	Color* endWarmupColors;
 

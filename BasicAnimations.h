@@ -5,6 +5,7 @@
 #include "Basic.h"
 #include "ColorPalette.h"
 #include "ColorPairPalette.h"
+#include "ColorSets.h"
 
 typedef unsigned long ulong;
 #ifdef DEBUG
@@ -27,15 +28,17 @@ bool shouldContinueAnimation(ulong start)
 const int BEAM_ANIMATION_DELAY = 20;
 
 // Marches throught the given colors, with bandSize number of colors repeated in a row
-void colorMarch(Color* colors, int numColors, const int bandSize)
+void colorMarch(ColorPalette& palette, const int bandSize)
 {
 	int cycleOffset = 0;
+
+	int numColors = palette.getNumColors();
 
 	WHILE_ANIMATION_LOOP
 	{
 		for(int i = 0; i < NUM_LEDS; i++)
 		{
-			Color c = colors[((i + cycleOffset) / bandSize) % numColors];
+			Color c = palette.getColor(((i + cycleOffset) / bandSize) % numColors);
 			setLed(i, c);
 		}
 
@@ -44,7 +47,6 @@ void colorMarch(Color* colors, int numColors, const int bandSize)
 		cycleOffset++;
 	}
 }
-
 
 // Animation that has two colors moving together in one direction, with one color then the next with them lerped together
 void mixedWaveAnimation(Color color1, Color color2)
@@ -67,65 +69,6 @@ void mixedWaveAnimation(Color color1, Color color2)
 		FastLED.show();
 		delay(60);
 		cyclePosition = (cyclePosition + 1) % WAVE_LENGTH;
-	}
-}
-
-void randomMixedWaveAnimation()
-{
-	Color color1, color2;
-	getNextRandomColorPair(color1, color2);
-
-	Color pairs[] =
-	{
-		ROYAL_BLUE,
-		WHITE,
-
-		LIME_GREEN,
-		WHITE,
-
-		ORCHID,
-		ROYAL_BLUE,
-
-		ROYAL_BLUE,
-		YELLOW,
-
-		Color::Red,
-		LIME_GREEN,
-
-		SKY_BLUE,
-		LAVENDAR,
-	};
-	const int numPairs = sizeof(pairs) / sizeof(pairs[0]) / 2;
-	int pairIndex = random(numPairs);
-
-	mixedWaveAnimation(pairs[pairIndex * 2], pairs[pairIndex * 2 + 1]);
-}
-
-void greenBlueThrobAnimation()
-{
-	int cycleOffset = 0;
-	const int TRANSITION_TICKS = 100;
-	Color color1 = Color::Green;
-	Color color2 = Color::Blue;
-
-	WHILE_ANIMATION_LOOP
-	{
-		for(int cyclePosition = 0; cyclePosition <= TRANSITION_TICKS; cyclePosition++)
-		{
-			for(int ledIndex = 0; ledIndex < NUM_LEDS; ledIndex++)
-			{
-				int distanceFromPeak = TRANSITION_TICKS - cyclePosition;
-				float lerpValue = (float)distanceFromPeak / TRANSITION_TICKS;
-
-				Color interpolatedColor = colorLerp(lerpValue, color1, color2);
-				setLed(ledIndex, interpolatedColor);
-			}
-			FastLED.show();
-			delay(60);
-		}
-		Color temp = color1;
-		color1 = color2;
-		color2 = temp;
 	}
 }
 
@@ -156,7 +99,9 @@ void colorThrob(ColorPalette& colorGenerator)
 	}
 }
 
-void rainbowColorHillAnimation(ColorPalette& colorGenerator)
+// One color beam comes from one direction and fades out, then a different color beam comes from the other, repeat
+// The color starts dim, gets bright, gets dim again
+void colorHillAnimation(ColorPalette& colorGenerator)
 {
 	const byte trailLength = NUM_LEDS;
 	const int BUFFER = 10;
@@ -172,7 +117,6 @@ void rainbowColorHillAnimation(ColorPalette& colorGenerator)
 				// Glow things based on distance from the spot
 				int distance = abs(spotPosition - ledIndex);
 				setLed(ledIndex, colorLerp((float)distance / trailLength, color, Color::Black));
-
 			}
 
 			FastLED.show();
@@ -197,14 +141,16 @@ void rainbowColorHillAnimation(ColorPalette& colorGenerator)
 	}
 }
 
-void rainbowColorBeamAnimation()
+// One color beam comes from one direction and fades out, then a different color beam comes from the other, repeat
+// The color starts bright, then gets dim near the tailend
+void colorBeamAnimation(ColorPalette& palette)
 {
 	const byte trailLength = NUM_LEDS;
 	const byte buffer = 10;
 
 	WHILE_ANIMATION_LOOP
 	{
-		Color currentColor = getNextRandomColor();
+		Color currentColor = palette.getNextRandomColor();
 		for(int spotPosition = 0; spotPosition < NUM_LEDS + trailLength + buffer; spotPosition++)
 		{
 			for(int ledIndex = 0; ledIndex < NUM_LEDS; ledIndex++)
@@ -225,7 +171,7 @@ void rainbowColorBeamAnimation()
 		}
 
 		// GO back the other way
-		currentColor = getNextRandomColor();
+		currentColor = palette.getNextRandomColor();
 		for(int spotPosition = 0; spotPosition < NUM_LEDS + trailLength + buffer; spotPosition++)
 		{
 			for(int ledIndex = 0; ledIndex < NUM_LEDS; ledIndex++)
@@ -247,7 +193,8 @@ void rainbowColorBeamAnimation()
 	}
 }
 
-void rainbowColorBeamCollisionAnimation()
+// Two colors come from both sides and pass through eachother
+void colorBeamCollisionAnimation(ColorPairPalette& colorPalette)
 {
 	const byte trailLength = NUM_LEDS;
 	const byte buffer = 10;
@@ -258,7 +205,7 @@ void rainbowColorBeamCollisionAnimation()
 		Color leftColor;
 		Color rightColor;
 
-		getNextRandomColorPair(leftColor, rightColor);
+		colorPalette.getNextRandomColorPair(leftColor, rightColor);
 
 		for(int spotPosition = 0; spotPosition < animationDistance; spotPosition++)
 		{
@@ -290,6 +237,7 @@ void rainbowColorBeamCollisionAnimation()
 	}
 }
 
+// Randomly dim bulbs light up to a color, then fade back to black
 void randomBrightSpots(ColorPalette& generator, int fadeTicks)
 {
 	const int COLOR_CHANCE = 25;
@@ -381,220 +329,5 @@ void lineSwap(ColorPalette& colorGenerator)
 
 		// Hold color for a bit
 		delay(500);
-	}
-}
-
-void rainbowColorThrob()
-{
-	colorThrob(COMPLEX_RAINBOW_COLOR_GENERATOR);
-}
-
-// Meant to resemble the glow of a fire
-void fireGlow()
-{
-	Color emberColors[] = {Color(50, 0, 0), Color(40, 0, 0), Color(30, 0, 0), Color(20, 0, 0), Color(10, 0, 0), Color(20, 20, 0), Color(20, 10, 0), Color(30, 10, 0)};
-	ColorPalette palette(emberColors, getStaticArraySize(emberColors));
-	randomBrightSpots(palette, 1);
-}
-
-void linnaeusFavoriteBrightSpotsAnimation()
-{
-	Color linnaeusColors[] = {Color::Green, Color::Blue};
-	ColorPalette palette(linnaeusColors, getStaticArraySize(linnaeusColors));
-	randomBrightSpots(palette, 10);
-}
-
-void greenBlueMarchAnimation()
-{
-	Color colors[] = {Color::Green, Color::Blue};
-	colorMarch(colors, getStaticArraySize(colors), 2);
-}
-
-void greenBlueWavesAnimation()
-{
-	mixedWaveAnimation(LIME_GREEN, ROYAL_BLUE);
-}
-
-void rainbowLineSwap()
-{
-	lineSwap(COMPLEX_RAINBOW_COLOR_GENERATOR);
-}
-
-void candyCornMarch()
-{
-	Color colors[] = {Color::White, Color::OrangeRed, GOLDEN_YELLOW};
-	int numColors = sizeof(colors)/sizeof(colors[0]);
-
-	colorMarch(colors, numColors, 2);
-}
-
-void halloweenBlinkAnimation()
-{
-	Color colors[] = {Color::Purple, Color::Orange, Color::Green};
-	ColorPalette palette(colors, getStaticArraySize(colors));
-	randomBrightSpots(palette, 10);
-}
-
-void halloweenLineSwap()
-{
-	lineSwap(HALLOWEEN_COLOR_GENERATOR);
-}
-
-void halloweenMixedWave()
-{
-	Color one, two;
-	HALLOWEEN_COLOR_PAIR_GENERATOR.getNextRandomColorPair(one, two);
-	mixedWaveAnimation(one, two);
-}
-
-//region Chimney animations
-
-#define RING_WIDTH 6 // LEDS
-#define DOUBLE_RING_WIDTH (6 * 2) // LEDS
-
-// void bouncyRing()
-// {
-// 	const int RAINBOW_LINE_SWAP_DELAY = 70;
-// 	for(int ledIndex = 0; ledIndex < NUM_LEDS; ledIndex++)
-// 	{
-// 		setLed(ledIndex, Color::Black);
-// 	}
-// 	FastLED.show();
-
-// 	bool goingUp = true;
-
-// 	Color ringColor = getNextRandomColor();
-
-// 	int ringIndex = 0;
-
-// 	WHILE_ANIMATION_LOOP
-// 	{
-// 		while(ringIndex + RING_WIDTH < NUM_LEDS)
-// 		{
-// 			for
-
-// 			delay(500);
-// 		}
-
-// 		delay(500);
-// 	}
-// }
-
-void setRingColor(int startRingIndex, Color color)
-{
-	int startIndex = clamp(startRingIndex, 0, NUM_LEDS - 1);
-
-	// If we're more than a ring away, just don't draw it
-	if(startRingIndex - startIndex > RING_WIDTH)
-		return;
-
-	int lastLedIndex = clamp(startRingIndex + RING_WIDTH, 0, NUM_LEDS - 1);
-
-	for(int ledIndex = startIndex; ledIndex <= lastLedIndex; ledIndex++)
-		setLed(ledIndex, color);
-}
-
-void setDoubleRingColor(int startRingIndex, Color color)
-{
-	int startIndex = clamp(startRingIndex, 0, NUM_LEDS - 1);
-
-	// If we're more than a ring away, just don't draw it
-	if(startRingIndex - startIndex > DOUBLE_RING_WIDTH)
-		return;
-
-	int lastLedIndex = clamp(startRingIndex + DOUBLE_RING_WIDTH, 0, NUM_LEDS - 1);
-
-	for(int ledIndex = startIndex; ledIndex <= lastLedIndex; ledIndex++)
-		setLed(ledIndex, color);
-}
-
-void candyCaneSpiral()
-{
-	const int maxOffset = DOUBLE_RING_WIDTH * 2;
-	WHILE_ANIMATION_LOOP
-	{
-		for(int offset = 0; offset < maxOffset; offset++)
-		{
-			bool isWhite = false;
-			for(int ledIndex = -DOUBLE_RING_WIDTH + offset; ledIndex < NUM_LEDS; ledIndex += DOUBLE_RING_WIDTH)
-			{
-				if(isWhite)
-					setDoubleRingColor(ledIndex, DIM_WHITE);
-				else
-					setDoubleRingColor(ledIndex, Color::Red);
-
-				isWhite = !isWhite;
-			}
-			FastLED.show();
-			delay(400);
-		}
-	}
-}
-
-void candyCaneMixedWave()
-{
-	mixedWaveAnimation(Color::Red, DIM_WHITE);
-}
-
-void christmasBrightSpots()
-{
-	Color christmasColors[] = {Color::Green, Color::Red, DIM_WHITE};
-	ColorPalette palette(christmasColors, getStaticArraySize(christmasColors));
-	randomBrightSpots(palette, 10);
-}
-
-//endregion Chimeny animations
-
-using AnimationFunction = void(void);
-AnimationFunction* ANIMATIONS[] =
-{
-	&rainbowColorHillAnimation,
-	&rainbowColorBeamCollisionAnimation,
-	&greenBlueWavesAnimation,
-	&rainbowColorBeamAnimation,
-	&greenBlueThrobAnimation,
-	&linnaeusFavoriteBrightSpotsAnimation,
-	&randomMixedWaveAnimation,
-	&rainbowLineSwap,
-};
-int NUM_ANIMATIONS = sizeof(ANIMATIONS)/ sizeof(ANIMATIONS[0]);
-
-AnimationFunction* HALLOWEEN_ANIMATIONS[] =
-{
-	&halloweenMixedWave,
-	&halloweenLineSwap,
-	&halloweenBlinkAnimation,
-	&halloweenMixedWave,
-	&candyCornMarch,
-};
-int NUM_HALLOWEEN_ANIMATIONS = sizeof(HALLOWEEN_ANIMATIONS)/ sizeof(HALLOWEEN_ANIMATIONS[0]);
-
-AnimationFunction* CHIMNEY_ANIMATIONS[] =
-{
-	// &waterFill,
-	&rainbowColorThrob,
-	&candyCaneMixedWave,
-	&fireGlow,
-	&christmasBrightSpots,
-	&rainbowColorHillAnimation,
-	&rainbowColorBeamCollisionAnimation,
-	&rainbowLineSwap,
-	&candyCaneSpiral,
-	&greenBlueWavesAnimation,
-	&rainbowColorBeamAnimation,
-	&greenBlueThrobAnimation,
-	&linnaeusFavoriteBrightSpotsAnimation,
-	&randomMixedWaveAnimation,
-	&rainbowLineSwap,
-};
-int NUM_CHIMNEY_ANMIATIONS = sizeof(CHIMNEY_ANIMATIONS)/ sizeof(CHIMNEY_ANIMATIONS[0]);
-
-void doSingleStrandAnimationLoop()
-{
-	for(int animationIndex = 0; animationIndex < NUM_CHIMNEY_ANMIATIONS; animationIndex++)
-	{
-		debug("Starting animation: ");
-		debug(animationIndex);
-		CHIMNEY_ANIMATIONS[animationIndex]();
 	}
 }

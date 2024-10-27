@@ -15,6 +15,17 @@ public:
 		randomColorIndex = random(numColors);
 	}
 
+	int getNumColors()
+	{
+		return numColors;
+	}
+
+	Color getColor(int colorIndex) const
+	{
+		assert(colorIndex >= 0 && colorIndex < numColors, "Color index out of bounds");
+		return colors[colorIndex];
+	}
+
 	Color getNextRandomColor()
 	{
 		randomColorIndex = getNextRandomExclusive(randomColorIndex, numColors);
