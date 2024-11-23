@@ -2,36 +2,12 @@
 #include "IRremote.hpp"
 
 #define MAX_BRIGHTNESS 100
-#define MIN_BRIGHTNESS 0
+#define MIN_BRIGHTNESS 5
 #define BRIGHTNESS_CHANGE_INCREMENT 5
-
-/*
-command: 69
-command: 70
-command: 71
-command: 68
-command: 64
-command: 67
-command: 7
-command: 21
-command: 9
-command: 22
-command: 25
-command: 13
-command: 12
-command: 24
-command: 94
-command: 8
-command: 28
-*/
-#define INCREASE_BRIGHTNESS_COMMAND_CODE 69
-#define DECREASE_BRIGHTNESS_COMMAND_CODE 70
-
 
 RemoteAnimationController::RemoteAnimationController(int recieverPin)
 {
 	this->recieverPin = recieverPin;
-
 }
 
 void RemoteAnimationController::startRecieving()
@@ -39,11 +15,8 @@ void RemoteAnimationController::startRecieving()
 	IrReceiver.begin(recieverPin, ENABLE_LED_FEEDBACK);
 
 	initFastLeds();
-	for(int i = 0; i < NUM_LEDS; i++)
-	{
-		setLed(i, Color::White);
-	}
-	FastLED.setBrightness(lightBrigthness);
+	setStrandColor(plainStrandColor);
+	FastLED.setBrightness(lightBrightness);
 	FastLED.show();
 
 	debug("Starting to recieve");
@@ -61,8 +34,7 @@ void RemoteAnimationController::waitUnlessInterupted(int waitMillieseconds)
 {
 	if (IrReceiver.decode()) 
 	{
-		uint16_t command = IrReceiver.decodedIRData.command;
-		debugValue("command", command);
+		CommandCode command = (CommandCode)IrReceiver.decodedIRData.command;
 		lastDecodeCommand = command;
 		handleInternalCommand(command);
 		delay(waitMillieseconds);  // wait a bit
@@ -70,26 +42,51 @@ void RemoteAnimationController::waitUnlessInterupted(int waitMillieseconds)
 	}
 }
 
-void RemoteAnimationController::handleInternalCommand(uint16_t command)
+void RemoteAnimationController::handleInternalCommand(CommandCode command)
 {
-	debug("Hnalding command");
+	// Macro for handling a plain color command
+	#define PlainColorCommandCase(colorName)\
+	case CommandCode::colorName:\
+		setStrandColor(Color::colorName);\
+		break;
+
 	switch(command)
 	{
-		case INCREASE_BRIGHTNESS_COMMAND_CODE:
-			debug("increasing");
-			lightBrigthness = clamp(lightBrigthness + BRIGHTNESS_CHANGE_INCREMENT, MIN_BRIGHTNESS, MAX_BRIGHTNESS);
-			debugValue("lightBrightness", lightBrigthness);
-			FastLED.setBrightness(lightBrigthness);
-			FastLED.show();
+		case CommandCode::IncreaseBrightness:
+			setStrandBrightness(lightBrightness + BRIGHTNESS_CHANGE_INCREMENT);
 			break;
 
-		case DECREASE_BRIGHTNESS_COMMAND_CODE:
-			lightBrigthness = clamp(lightBrigthness - BRIGHTNESS_CHANGE_INCREMENT, MIN_BRIGHTNESS, MAX_BRIGHTNESS);
-			debugValue("lightBrightness", lightBrigthness);
-			FastLED.setBrightness(lightBrigthness);
-			FastLED.show();
+		case CommandCode::DecreaseBrightness:
+			setStrandBrightness(lightBrightness - BRIGHTNESS_CHANGE_INCREMENT);
 			break;
+		PlainColorCommandCase(Red);
+		PlainColorCommandCase(Yellow);
+		PlainColorCommandCase(Purple);
+		PlainColorCommandCase(Green);
+		PlainColorCommandCase(Teal);
+		PlainColorCommandCase(Orange);
+		PlainColorCommandCase(Blue);
+		PlainColorCommandCase(Pink);
+		PlainColorCommandCase(White);
+
 		default:
 			break;
-		
+	}
+}
+
+void RemoteAnimationController::setStrandColor(Color color)
+{
+	plainStrandColor = color;
+	for(int i = 0; i < NUM_LEDS; i++)
+	{
+		setLed(i, plainStrandColor);
+	}
+	FastLED.show();
+}
+
+void RemoteAnimationController::setStrandBrightness(int brightness)
+{
+	lightBrightness = clamp(brightness, MIN_BRIGHTNESS, MAX_BRIGHTNESS);
+	FastLED.setBrightness(lightBrightness);
+	FastLED.show();
 }
