@@ -28,6 +28,7 @@ const Color LAVENDAR = Color(100, 50, 255);
 const Color PURPLE = Color::Purple;
 const Color PALE_PURPLE = Color(50, 0, 200);
 
+#ifdef INCLUDE_RAINBOW_ANIMATIONS
 const Color COMPLEX_RAINBOW[] =
 {
 	// Reds
@@ -134,11 +135,15 @@ const Color RAINBOW_PAIRS[] =
 	// PURPLE_BLUE,
 };
 const int NUM_RAINBOW_PAIRS = getStaticArraySize(RAINBOW_PAIRS) / 2;
+static ColorPalette COMPLEX_RAINBOW_COLOR_PALETTE(COMPLEX_RAINBOW, COMPLEX_RAINBOW_COLOR_COUNT);
+static ColorPairPalette COMPLEX_RAINBOW_COLOR_PAIR_PALETTE(RAINBOW_PAIRS, NUM_RAINBOW_PAIRS);
+#endif
 
-Color HALLOWEEN_COLORS[] = {Color::Purple, Color::Orange, Color::Green, Color::Red};
+#ifdef INCLUDE_HALLOWEEN_ANIMATIONS
+const Color HALLOWEEN_COLORS[] = {Color::Purple, Color::Orange, Color::Green, Color::Red};
 const int NUM_HALLOWEEN_COLORS = getStaticArraySize(HALLOWEEN_COLORS);
 
-Color HALLOWEEN_PAIRS[] = 
+const Color HALLOWEEN_PAIRS[] = 
 {
 	Color::Purple,
 	Color::Red,
@@ -153,8 +158,28 @@ Color HALLOWEEN_PAIRS[] =
 	Color::Orange,
 };
 const int NUM_HALLOWEEN_COLOR_PAIRS = getStaticArraySize(HALLOWEEN_PAIRS) / 2;
-
-static ColorPalette COMPLEX_RAINBOW_COLOR_PALETTE(COMPLEX_RAINBOW, COMPLEX_RAINBOW_COLOR_COUNT);
-static ColorPairPalette COMPLEX_RAINBOW_COLOR_PAIR_PALETTE(RAINBOW_PAIRS, NUM_RAINBOW_PAIRS);
 static ColorPalette HALLOWEEN_COLOR_PALETTE(HALLOWEEN_COLORS, NUM_HALLOWEEN_COLORS);
 static ColorPairPalette HALLOWEEN_COLOR_PAIR_PALETTE(HALLOWEEN_PAIRS, NUM_HALLOWEEN_COLOR_PAIRS);
+#endif
+
+#ifdef INCLUDE_THANKSGIVING_ANIMATIONS
+const Color THANKSGIVING_COLORS[] = {Color::Red, Color::Orange, Color::Yellow};
+const int NUM_THANKSGIVING_COLORS = getStaticArraySize(THANKSGIVING_COLORS);
+
+const Color THANKSGIVING_PAIRS[] = 
+{
+	Color::Yellow,
+	Color::Red,
+
+	Color::Red,
+	Color::Orange,
+
+	Color::Yellow,
+	Color::Orange,
+};
+const int NUM_THANKSGIVING_COLOR_PAIRS = getStaticArraySize(THANKSGIVING_PAIRS) / 2;
+
+static ColorPalette THANKSGIVING_COLOR_PALETTE(THANKSGIVING_COLORS, NUM_THANKSGIVING_COLORS);
+static ColorPairPalette THANKSGIVING_COLOR_PAIR_PALETTE(THANKSGIVING_PAIRS, NUM_THANKSGIVING_COLOR_PAIRS);
+
+#endif 

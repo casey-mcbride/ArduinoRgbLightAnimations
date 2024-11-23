@@ -1,6 +1,7 @@
 #pragma once
+#include "Configuration.h"
+#include "FastLED.h"
 
-// #define DEBUG
 
 const byte BYTE_MAX = 255;
 const byte BYTE_MIN = 0;
@@ -50,16 +51,7 @@ const byte BYTE_MIN = 0;
 
 #define getStaticArraySize(array) sizeof(array) / sizeof(array[0])
 
-inline void initDebugIO()
-{
-	#ifdef DEBUG
-	// Start io
-	Serial.begin(9600);
-
-	pinMode(LED_BUILTIN, OUTPUT);
-	debug("IO initialized");
-	#endif
-}
+void initDebugIO();
 
 
 template<typename numeric>
@@ -92,24 +84,11 @@ numeric min3(numeric a, numeric b, numeric c)
     return min(min(a, b), c);
 }
 
-int getNextRandomExclusive(int start, int exclusiveMax)
-{
-	// Choose a next random number, but prevent it from being the same one
-	start = start + random(exclusiveMax - 1);
-	start = (start + 1) % exclusiveMax;
+int getNextRandomExclusive(int start, int exclusiveMax);
 
-	return start;
-}
+int random(int inclusiveMin, int exclusiveMax);
 
-int random(int inclusiveMin, int exclusiveMax)
-{
-	return random(exclusiveMax - inclusiveMin) + inclusiveMin;
-}
-
-bool randomBool()
-{
-	return random(2);
-}
+bool randomBool();
 
 typedef unsigned long Timestamp;
 typedef CRGB Color;
