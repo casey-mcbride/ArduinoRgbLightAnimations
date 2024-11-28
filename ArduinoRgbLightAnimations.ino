@@ -2,12 +2,12 @@
 #include "RemoteAnimationController.h"
 #include "Configuration.h"
 #include "Basic.h"
-#include "ColorUtils.h"
+// #include "ColorUtils.h"
+// #include "IRremote.hpp"
 // #include "BasicAnimations.h"
 // #include "ColorUtils.h"
 
 // typedef void* (int) AnimationFunction;
-RemoteAnimationController controller(2);
 
 // #define LED_DATA_PIN 6
 #define MAX_BRIGHTNESS 100
@@ -19,10 +19,11 @@ void setup()
 
 	// If nothing in 0, noise produces a semi-random number
 	randomSeed(analogRead(0));
-	controller.startRecieving();
+	RemoteAnimationController::startRecieving(IR_RECIEVER_DATA_PIN);
 }
 
 void loop()
 {
-	controller.startAnimationLoop();
+	RemoteAnimationController::startAnimationLoop();
+	// RemoteAnimationController::testIRReceiverLoop();
 }

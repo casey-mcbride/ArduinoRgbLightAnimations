@@ -3,14 +3,19 @@
 #include "ColorPalette.h"
 #include "ColorPairPalette.h"
 #include "ColorSets.h"
+#include "RemoteAnimationController.h"
 
-bool shouldContinueAnimation(ulong start)
-{
-	delay(30);
-	ulong currentTime = millis();
-	bool shouldContinue = currentTime - start < animationMilliSeconds;
-	return shouldContinue;
-}
+#define WHILE_ANIMATION_LOOP ;\
+	while(RemoteAnimationController::shouldCurrentAnimationContinue())
+
+#define DELAY_OR_RETURN(delayMS)\
+	if(RemoteAnimationController::delayUnlessInterrupted((delayMS)))\
+	{\
+		debug("Early exit");\
+		return;\
+	}
+
+static const int BEAM_ANIMATION_DELAY = 20;
 
 // Marches throught the given colors, with bandSize number of colors repeated in a row
 void colorMarch(ColorPalette& palette, const int bandSize)
@@ -28,7 +33,7 @@ void colorMarch(ColorPalette& palette, const int bandSize)
 		}
 
 		FastLED.show();
-		delay(500);
+		DELAY_OR_RETURN(500);
 		cycleOffset++;
 	}
 }
@@ -52,7 +57,7 @@ void mixedWaveAnimation(Color color1, Color color2)
 			setLed(ledIndex, interpolatedColor);
 		}
 		FastLED.show();
-		delay(60);
+		DELAY_OR_RETURN(60);
 		cyclePosition = (cyclePosition + 1) % WAVE_LENGTH;
 	}
 }
@@ -77,7 +82,7 @@ void colorThrob(ColorPalette& colorGenerator)
 				setLed(ledIndex, interpolatedColor);
 			}
 			FastLED.show();
-			delay(60);
+			DELAY_OR_RETURN(60);
 		}
 		color2 = color1;
 		color1 = colorGenerator.getNextRandomColor();
@@ -105,7 +110,7 @@ void colorHillAnimation(ColorPalette& colorGenerator)
 			}
 
 			FastLED.show();
-			delay(BEAM_ANIMATION_DELAY);
+			DELAY_OR_RETURN(BEAM_ANIMATION_DELAY);
 		}
 
 		// Go reverse direction
@@ -121,7 +126,7 @@ void colorHillAnimation(ColorPalette& colorGenerator)
 			}
 
 			FastLED.show();
-			delay(BEAM_ANIMATION_DELAY);
+			DELAY_OR_RETURN(BEAM_ANIMATION_DELAY);
 		}
 	}
 }
@@ -152,7 +157,7 @@ void colorBeamAnimation(ColorPalette& palette)
 			}
 
 			FastLED.show();
-			delay(BEAM_ANIMATION_DELAY);
+			DELAY_OR_RETURN(BEAM_ANIMATION_DELAY);
 		}
 
 		// GO back the other way
@@ -173,7 +178,7 @@ void colorBeamAnimation(ColorPalette& palette)
 			}
 
 			FastLED.show();
-			delay(BEAM_ANIMATION_DELAY);
+			DELAY_OR_RETURN(BEAM_ANIMATION_DELAY);
 		}
 	}
 }
@@ -217,7 +222,7 @@ void colorBeamCollisionAnimation(ColorPairPalette& colorPalette)
 			}
 
 			FastLED.show();
-			delay(BEAM_ANIMATION_DELAY);
+			DELAY_OR_RETURN(BEAM_ANIMATION_DELAY);
 		}
 	}
 }
@@ -242,7 +247,7 @@ void randomBrightSpots(ColorPalette& generator, int fadeTicks)
 			setLed(ledIndex, current);
 		}
 		FastLED.show();
-		delay(30);
+		DELAY_OR_RETURN(30);
 	}
 }
 
@@ -283,7 +288,7 @@ void lineSwap(ColorPalette& colorGenerator)
 				}
 
 				FastLED.show();
-				delay(LINE_SWAP_DELAY);
+				DELAY_OR_RETURN(LINE_SWAP_DELAY);
 			}
 		}
 		else
@@ -305,7 +310,7 @@ void lineSwap(ColorPalette& colorGenerator)
 				}
 
 				FastLED.show();
-				delay(LINE_SWAP_DELAY);
+				DELAY_OR_RETURN(LINE_SWAP_DELAY);
 			}
 		}
 
@@ -313,7 +318,7 @@ void lineSwap(ColorPalette& colorGenerator)
 		current = next;
 
 		// Hold color for a bit
-		delay(500);
+		DELAY_OR_RETURN(500);
 	}
 }
 
@@ -350,7 +355,7 @@ void firelightAnimation()
 			}
 
 			FastLED.show();
-			delay(50);
+			DELAY_OR_RETURN(50);
 		}
 
 		// TODO: INstead of moving these all left, just keep track of the current index and replace it, i.e. make a circular queue

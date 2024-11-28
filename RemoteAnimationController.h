@@ -16,7 +16,7 @@ enum AnimationMode
 {
 	PlainColor,
 	HoldAnimation,
-	RotateAnimations,
+	RandomAnimation,
 };
 
 enum CommandCode
@@ -49,23 +49,20 @@ enum CommandCode
 class RemoteAnimationController
 {
 public:
-	RemoteAnimationController(int recieverPin);
+	static void startRecieving(int receiverPin);
+	static void startAnimationLoop();
+	static void testIRReceiverLoop();
 
-	void startRecieving();
-	void startAnimationLoop();
-
-	void waitUnlessInterupted(int waitMillieseconds);
+	// Delays the animation, while also waiting for interupts. Returns true if the current animation should be cancelled and returned from
+	static bool delayUnlessInterrupted(int delayMillieseconds);
+	static bool shouldCurrentAnimationContinue();
 
 private:
-	// uint16_t pollTime = 10;
-	int lastDecodeTime = 10;
-	CommandCode lastDecodeCommand = 0;
-	int recieverPin;
-	int lightBrightness = 50;
-	Color plainStrandColor = Color::White;
-	AnimationMode currentMode = AnimationMode::PlainColor;
 
-	void handleInternalCommand(CommandCode command);
-	void setStrandColor(Color color);
-	void setStrandBrightness(int brightness);
+	RemoteAnimationController() = delete;
+
+	static void handleInternalCommand(CommandCode command);
+	static void chooseNextRandomAnimation();
+	static void setStrandColor(Color color);
+	static void setStrandBrightness(int brightness);
 };

@@ -7,19 +7,7 @@
 #include "ColorPairPalette.h"
 #include "ColorSets.h"
 
-typedef unsigned long ulong;
-#ifdef DEBUG
-	const ulong animationMilliSeconds = (ulong)12 * (ulong)1000;// need to cast, otherwise you get int max, idky
-#else
-	const ulong animationMilliSeconds = (ulong)90 * (ulong)1000;
-#endif
 
-bool shouldContinueAnimation(ulong start);
-
-#define WHILE_ANIMATION_LOOP ulong whileAnimationLoopStartTime = millis();\
-	while(shouldContinueAnimation(whileAnimationLoopStartTime))
-
-const int BEAM_ANIMATION_DELAY = 20;
 
 // Marches throught the given colors, with bandSize number of colors repeated in a row
 void colorMarch(ColorPalette& palette, const int bandSize);

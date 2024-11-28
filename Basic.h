@@ -22,6 +22,8 @@ const byte BYTE_MIN = 0;
 		Serial.print(": ");\
 		Serial.println((value));
 
+	#define debugRaw(value) debugValue(#value, value);
+
 	#define debugValueIf(flag, header, value)\
 		if(flag)\
 		{\
@@ -45,6 +47,7 @@ const byte BYTE_MIN = 0;
 	#define debug(message)
 	#define debugValue(header, value)
 	#define debugValueIf(flag, header, value)
+	#define debugRaw(value) debugValue(#value, value);
 	#define debugBlink(on)
 
 #endif
@@ -92,6 +95,7 @@ bool randomBool();
 
 typedef unsigned long Timestamp;
 typedef CRGB Color;
+typedef unsigned long ulong;
 
 // template<typename TypeOne, typename TypeTwo>
 // struct Pair

@@ -6,6 +6,9 @@
 #include "LedClusterAnimations.h"
 #include "Basic.h"
 #include "RemoteAnimationController.h"
+#include "ColorSets.h"
+
+#ifdef INCLUDE_RAINBOW_ANIMATIONS
 
 void rainbowColorBeamCollisionAnimation()
 {
@@ -67,14 +70,9 @@ void rainbowColorBeamAnimation()
 {
 	colorBeamAnimation(COMPLEX_RAINBOW_COLOR_PALETTE);
 }
+#endif
 
-void candyCornMarch()
-{
-	Color colors[] = {Color::White, Color::OrangeRed, GOLDEN_YELLOW};
-	ColorPalette palette(colors, getStaticArraySize(colors));
-
-	colorMarch(palette, 3);
-}
+#ifdef INCLUDE_HALLOWEEN_ANIMATIONS
 
 void halloweenBlinkAnimation()
 {
@@ -107,6 +105,18 @@ void halloweenMixedWave()
 	mixedWaveAnimation(one, two);
 }
 
+#endif
+
+#ifdef INCLUDE_THANKSGIVING_ANIMATIONS
+
+void candyCornMarch()
+{
+	Color colors[] = {Color::White, Color::OrangeRed, GOLDEN_YELLOW};
+	ColorPalette palette(colors, getStaticArraySize(colors));
+
+	colorMarch(palette, 3);
+}
+
 void thanksgivingBlinkAnimation()
 {
 	randomBrightSpots(THANKSGIVING_COLOR_PALETTE, 10);
@@ -129,6 +139,10 @@ void thanksgivingMixedWave()
 	mixedWaveAnimation(one, two);
 }
 
+#endif
+
+#ifdef INCLUDE_CHRISTMAS_ANIMATIONS
+
 void candyCaneMixedWave()
 {
 	mixedWaveAnimation(Color::Red, DIM_WHITE);
@@ -141,9 +155,12 @@ void christmasBrightSpots()
 	randomBrightSpots(palette, 10);
 }
 
+#endif
+
 using AnimationFunction = void(void);
 AnimationFunction* ANIMATIONS[] =
 {
+#ifdef INCLUDE_RAINBOW_ANIMATIONS
 	&rainbowColorHillAnimation,
 	&rainbowColorBeamCollisionAnimation,
 	&greenBlueWavesAnimation,
@@ -152,11 +169,9 @@ AnimationFunction* ANIMATIONS[] =
 	&linnaeusFavoriteBrightSpotsAnimation,
 	&randomMixedRainbowWaveAnimation,
 	&rainbowLineSwap,
-};
-int NUM_ANIMATIONS = getStaticArraySize(ANIMATIONS);
+#endif
 
-AnimationFunction* HALLOWEEN_ANIMATIONS[] =
-{
+#ifdef INCLUDE_HALLOWEEN_ANIMATIONS
 	&firelightAnimation,
 	&halloweenMixedWave,
 	&halloweenLineSwap,
@@ -164,16 +179,21 @@ AnimationFunction* HALLOWEEN_ANIMATIONS[] =
 	&halloweenBlinkAnimation,
 	&candyCornMarch,
 	&halloweenRedBeamCollision,
-};
-int NUM_HALLOWEEN_ANIMATIONS = getStaticArraySize(HALLOWEEN_ANIMATIONS);
+#endif
 
-AnimationFunction* THANKSGIVING_ANIMATIONS[] =
-{
+#ifdef INCLUDE_THANKSGIVING_ANIMATIONS
 	&candyCornMarch,
 	&firelightAnimation,
 	&thanksgivingMixedWave,
 	&thanksgivingLineSwap,
 	&thanksgivingBeamCollision,
 	&thanksgivingBlinkAnimation,
+#endif
+
+#ifdef INCLUDE_CHRISTMAS_ANIMATIONS
+	&christmasBrightSpots,
+	&candyCaneMixedWave,
+#endif
 };
-int NUM_THANKSGIVING_ANIMATIONS = getStaticArraySize(THANKSGIVING_ANIMATIONS);
+
+int NUM_ANIMATIONS = getStaticArraySize(ANIMATIONS);
