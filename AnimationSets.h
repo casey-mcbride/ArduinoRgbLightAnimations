@@ -148,11 +148,40 @@ void candyCaneMixedWave()
 	mixedWaveAnimation(Color::Red, DIM_WHITE);
 }
 
+void christmasWhiteAndBlueMarch()
+{
+	Color colors[] = {Color::White, Color::Blue};
+	ColorPalette palette(colors, getStaticArraySize(colors));
+
+	colorMarch(palette, 2);
+}
+
+void christmasWhiteAndBlueMixedWave()
+{
+	Color colors[] = {Color::White, Color::Blue};
+	ColorPalette palette(colors, getStaticArraySize(colors));
+
+	mixedWaveAnimation(Color::White, Color::Blue);
+}
+
+void christmasBlinkAnimation()
+{
+	randomBrightSpots(CHRISTMAS_COLOR_PALETTE, 10);
+}
+
+void christmasLineSwap()
+{
+	lineSwap(CHRISTMAS_COLOR_PALETTE);
+}
+
+void christmasBeamCollision()
+{
+	colorBeamCollisionAnimation(CHRISTMAS_COLOR_PAIR_PALETTE);
+}
+
 void christmasBrightSpots()
 {
-	Color christmasColors[] = {Color::Green, Color::Red, DIM_WHITE};
-	ColorPalette palette(christmasColors, getStaticArraySize(christmasColors));
-	randomBrightSpots(palette, 10);
+	randomBrightSpots(CHRISTMAS_COLOR_PALETTE, 10);
 }
 
 #endif
@@ -191,6 +220,11 @@ AnimationFunction* ANIMATIONS[] =
 #endif
 
 #ifdef INCLUDE_CHRISTMAS_ANIMATIONS
+	&christmasWhiteAndBlueMixedWave,
+	&christmasWhiteAndBlueMarch,
+	&christmasBeamCollision,
+	&christmasBlinkAnimation,
+	&christmasLineSwap,
 	&christmasBrightSpots,
 	&candyCaneMixedWave,
 #endif

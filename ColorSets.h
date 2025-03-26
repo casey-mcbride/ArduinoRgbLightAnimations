@@ -183,3 +183,25 @@ static ColorPalette THANKSGIVING_COLOR_PALETTE(THANKSGIVING_COLORS, NUM_THANKSGI
 static ColorPairPalette THANKSGIVING_COLOR_PAIR_PALETTE(THANKSGIVING_PAIRS, NUM_THANKSGIVING_COLOR_PAIRS);
 
 #endif 
+
+#ifdef INCLUDE_CHRISTMAS_ANIMATIONS
+const Color CHRISTMAS_COLORS[] = {Color::Red, Color::Green, Color::White, Color::Blue, Color::Purple, Color::Yellow};
+const int NUM_CHRISTMAS_COLORS = getStaticArraySize(CHRISTMAS_COLORS);
+
+const Color CHRISTMAS_PAIRS[] =
+{
+	Color::Green,
+	Color::Red,
+
+	Color::White,
+	Color::Blue,
+
+	Color::Red,
+	Color::White,
+};
+const int NUM_CHRISTMAS_COLOR_PAIRS = getStaticArraySize(CHRISTMAS_PAIRS) / 2;
+
+static ColorPalette CHRISTMAS_COLOR_PALETTE(CHRISTMAS_COLORS, NUM_CHRISTMAS_COLORS);
+static ColorPairPalette CHRISTMAS_COLOR_PAIR_PALETTE(CHRISTMAS_PAIRS, NUM_CHRISTMAS_COLOR_PAIRS);
+
+#endif 
